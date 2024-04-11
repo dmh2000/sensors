@@ -7,6 +7,7 @@ import (
 )
 
 type config struct {
+	wavetype  string
 	frequency float64 // simulated wave frequency
 	amplitude float64 // simulated wave amplitude
 	dt        float64 // computed sample time dt
@@ -24,13 +25,19 @@ func readConfig() (config, error) {
 	if err != nil {
 		return cfg, fmt.Errorf("error loading config file")
 	}
+	wavetype := viper.Get("wavetype")
 	frequency := viper.Get("frequency")
 	amplitude := viper.Get("amplitude")
 	rate := viper.Get("rate")
 	debug := viper.Get("debug")
 
-	if frequency == nil || amplitude == nil || rate == nil {
+	if wavetype == nil || frequency == nil || amplitude == nil || rate == nil {
 		return cfg, fmt.Errorf("missing configuration parameters")
+	}
+
+	w, ok := wavetype.(string)
+	if !ok {
+		return cfg, fmt.Errorf("config 'wavetype' is not a string")
 	}
 
 	f, ok := frequency.(float64)
@@ -54,7 +61,7 @@ func readConfig() (config, error) {
 	// computer delta T in fractional seconds
 	dt := 1.0 / float64(r)
 
-	cfg = config{f, a, dt, p}
+	cfg = config{w, f, a, dt, p}
 
 	return cfg, nil
 }

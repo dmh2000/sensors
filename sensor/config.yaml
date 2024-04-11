@@ -7,3 +7,5 @@ amplitude: 1.0
 rate: 16.0
 # log mode : must be boolean true|false
 debug: true
+# type : sin square triangle sawtooth : must be string
+wavetype: "sin"

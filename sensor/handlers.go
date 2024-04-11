@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"math"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -28,7 +27,7 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 	fmt.Printf("Connection lost: %v", err)
 }
 
-func subscribe(client mqtt.Client, debug bool) error {
+func subscribe(client mqtt.Client, cfg config) error {
 	// subscribe to the same topic, that was published to, to receive the messages
 	topic := "topic/sensor"
 	token := client.Subscribe(topic, 1, nil)
@@ -37,25 +36,26 @@ func subscribe(client mqtt.Client, debug bool) error {
 	if token.Error() != nil {
 		return token.Error()
 	}
-	if debug {
+	if cfg.debug {
 		log.Printf("subscribed to topic : %s\n", topic)
 	}
 	return nil
 }
 
-// publish publishes messages to the topic "topic/test"
-// with a frequency of f (Hz) and amplitude of a
-func publish(client mqtt.Client, a float64, f float64, dt float64) error {
+// publish messages to the topic "topic/sensor"
+// with a frequency in Hz and amplitude in m
+func publish(client mqtt.Client, cfg config) error {
 	// publish the message "Message" to the topic "topic/test" 10 times in a for loop
 	fmt.Println("Publishing messages")
-	t := 0.0
-	ms := time.Millisecond * time.Duration(dt*1000)
-	for {
-		// limit angle to 0 to 2pi to avoid overflow and possible loss of precision in the Sin function
-		angle := math.Mod(2*math.Pi*f*t, 2*math.Pi)
-		v := a * math.Sin(angle)
-		text := fmt.Sprintf("%v,%f,%f", ms, t, v)
+	ms := time.Millisecond * time.Duration(cfg.dt*1000)
 
+	w := newWave(cfg.wavetype, cfg.frequency, cfg.amplitude, cfg.dt)
+	for {
+		// step the simulation
+		v, t := w.step()
+
+		// format the message
+		text := fmt.Sprintf("%v,%f,%f", ms, t, v)
 		token := client.Publish("topic/sensor", 0, false, text)
 		token.Wait()
 		// Check for errors during publishing (More on error reporting https://pkg.go.dev/github.com/eclipse/paho.mqtt.golang#readme-error-handling)
@@ -63,7 +63,5 @@ func publish(client mqtt.Client, a float64, f float64, dt float64) error {
 			return token.Error()
 		}
 		time.Sleep(ms)
-
-		t += dt
 	}
 }
