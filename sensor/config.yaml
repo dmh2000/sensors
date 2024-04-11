@@ -1,11 +1,10 @@
-# frequency in 2Pi rad/s : must be float d.d+
-frequency: 1.0
+# frequency in radians/sec : must be float d.d+
+frequency: 5.0
 # amplitude in m : must be float d.d+
 amplitude: 1.0
 # sample rate in Hz : must be float d.d+
-# 16.0 Hz is an even clock rate for a PC
-rate: 16.0
+rate: 20.0
 # log mode : must be boolean true|false
 debug: true
 # type : sin square triangle sawtooth : must be string
-wavetype: "sin"
+wavetype: "triangle"

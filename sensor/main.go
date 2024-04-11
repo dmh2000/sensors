@@ -53,7 +53,7 @@ func main() {
 	}
 
 	// add suscriptions
-	err = subscribe(client, cfg)
+	err = subscribe(client)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(3)
