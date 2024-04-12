@@ -5,26 +5,37 @@ import (
 )
 
 type sin struct {
-	a  float64
-	f  float64
-	t  float64
-	dt float64
+	amplitude float64
+	frequency float64
+	t         float64
+	dt        float64
+	dx        float64
+	x         float64
+	y         float64
 }
 
 type triangle struct {
-	a  float64
-	f  float64
-	t  float64
-	dt float64
+	amplitude float64
+	frequency float64
+	t         float64
+	dt        float64
+	dx        float64
+	dy        float64
+	x         float64
+	y         float64
+	state     int
+}
 
-	state int
-	dx    float64
-	dy    float64
-	x     float64
-	y     float64
-	p1    float64
-	p2    float64
-	p3    float64
+type square struct {
+	amplitude float64
+	frequency float64
+	t         float64
+	dt        float64
+	dx        float64
+	dy        float64
+	x         float64
+	y         float64
+	state     int
 }
 
 type wave interface {
@@ -33,28 +44,44 @@ type wave interface {
 
 func newSin(amplitude float64, frequency float64, dt float64) wave {
 	var w sin
-	w.f = frequency
-	w.a = amplitude
+
+	w.amplitude = amplitude
+	w.frequency = frequency * (math.Pi * 2.0) // convert to radians/sec
 	w.t = 0.0
 	w.dt = dt
+	w.dx = dt * frequency
+	w.x = 0.0
+	w.y = 0.0
 	return &w
 }
 
 func newTriangle(amplitude float64, frequency float64, dt float64) wave {
 	var w triangle
-	w.f = frequency
-	w.a = amplitude
+	w.amplitude = amplitude
+	w.frequency = frequency * (math.Pi * 2.0)
+	w.t = 0.0
+	w.dt = dt
+	w.dx = dt * (1.0 / frequency)
+	w.dy = amplitude * (dt * 4.0)
+	w.x = 0.0
+	w.y = 0.0
+	w.state = 0
+	return &w
+}
+
+func newSquare(amplitude float64, frequency float64, dt float64) wave {
+	var w square
+	w.frequency = frequency
+	w.amplitude = amplitude
 	w.t = 0.0
 	w.dt = dt
 
 	w.state = 0
-	w.dx = w.dt * w.f
-	w.dy = w.a / w.f
+	rate := 1.0 / dt
+	w.dx = rate / frequency
+	w.dy = w.amplitude * w.dx * 2.0 * math.Pi
 	w.x = 0.0
 	w.y = 0.0
-	w.p1 = w.f / 4.0
-	w.p2 = w.f * 3.0 / 4.0
-	w.p3 = w.f
 	return &w
 }
 
@@ -69,31 +96,62 @@ func newWave(wavetype string, amplitude float64, frequency float64, dt float64) 
 	}
 }
 
-func (s *sin) step() (float64, float64, float64) {
-	t := math.Mod(s.t, s.f)
-	x := t * s.f
-	y := s.a * math.Sin(x)
-	s.t += s.dt
-	return x, y, s.t
+func (w *sin) step() (float64, float64, float64) {
+	t := w.t
+	x := w.x
+	w.y = w.amplitude * math.Sin(w.t*w.frequency)
+	w.t += w.dt
+	w.x += w.dx
+	return x, w.y, t
 }
 
-func (s *triangle) step() (float64, float64, float64) {
+func (w *triangle) step() (float64, float64, float64) {
+	x := w.x
+	t := w.t
+	switch w.state {
+	case 0:
+		w.y = 0.0
+		w.state = 1
+	case 1:
+		w.y += w.dy
+		if w.y >= w.amplitude {
+			w.y = w.amplitude
+			w.state = 2
+		}
+	case 2:
+		w.y -= w.dy
+		if w.y <= -w.amplitude {
+			w.y = -w.amplitude
+			w.state = 3
+		}
+	case 3:
+		w.y += w.dy
+		if w.y >= 0.0 {
+			w.state = 1
+		}
+	}
+	w.t += w.dt
+	w.x += w.dx
+	return x, w.y, t
+}
+
+func (s *square) step() (float64, float64, float64) {
 	switch s.state {
 	case 0:
-		s.y = 0.0
+		s.y = s.amplitude
 		s.state = 1
 	case 1:
 		s.x += s.dx
 		s.y += s.dy
-		if s.y >= s.a {
-			s.y = s.a
+		if s.x >= s.amplitude {
+			s.y = s.amplitude
 			s.state = 2
 		}
 	case 2:
 		s.x += s.dx
 		s.y -= s.dy
-		if s.y <= -s.a {
-			s.y = -s.a
+		if s.y <= -s.amplitude {
+			s.y = -s.amplitude
 			s.state = 3
 		}
 	case 3:
