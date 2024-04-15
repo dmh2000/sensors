@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/joho/godotenv"
@@ -31,7 +33,7 @@ func main() {
 	var port = 8883  // find the port right under the host name, standard is 8883
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tls://%s:%d", broker, port))
-	opts.SetClientID("test") // set a name as you desire
+	opts.SetClientID("recv") // set a name as you desire
 	opts.SetUsername(user)
 	opts.SetPassword(pwd)
 
@@ -52,19 +54,29 @@ func main() {
 		os.Exit(2)
 	}
 
-	// // add suscriptions
-	// err = subscribe(client, cfg)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	os.Exit(3)
-	// }
-
-	// add publications, does not return unless there is an error
-	err = publish(client, cfg)
+	// add suscriptions
+	err = subscribe(client, "waveform/sin")
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(4)
+		os.Exit(3)
 	}
+
+	err = subscribe(client, "waveform/square")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(3)
+	}
+
+	err = subscribe(client, "waveform/triangle")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(3)
+	}
+
+	// block until user hits ctrl+c
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
+	<-done // Will block here until user hits ctrl+c
 
 	client.Disconnect(250)
 }

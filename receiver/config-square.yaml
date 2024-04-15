@@ -7,4 +7,4 @@ rate: 10.0
 # log mode : must be boolean true|false
 debug: true
 # type : sin square triangle sawtooth : must be string
-shape: "triangle"
+shape: "square"

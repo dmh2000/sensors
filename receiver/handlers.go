@@ -11,14 +11,14 @@ import (
 func messagePubHandlerFunc(debug bool) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		if debug {
-			fmt.Printf("%s,%s\n", msg.Topic(), msg.Payload())
+			fmt.Printf("%s,%s\r", msg.Topic(), msg.Payload())
 		}
 	}
 }
 
 // upon connection to the client, this is called
 var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
-	//fmt.Println("Connected")
+	fmt.Println("Connected")
 }
 
 // this is called when the connection to the client is lost, it prints "Connection lost" and the corresponding error
@@ -26,20 +26,22 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 	//fmt.Printf("Connection lost: %v", err)
 }
 
-// func subscribe(client mqtt.Client, cfg config) error {
-// 	// subscribe to the same topic, that was published to, to receive the messages
-// 	topic := fmt.Sprintf("waveform/%s", cfg.shape)
-// 	token := client.Subscribe(topic, 1, nil)
-// 	token.Wait()
-// 	// Check for errors during subscribe (More on error reporting https://pkg.go.dev/github.com/eclipse/paho.mqtt.golang#readme-error-handling)
-// 	if token.Error() != nil {
-// 		return token.Error()
-// 	}
-// 	return nil
-// }
+func subscribe(client mqtt.Client, topic string) error {
+	// subscribe to the same topic, that was published to, to receive the messages
+	fmt.Println("subscribing to topic: ", topic)
+	token := client.Subscribe(topic, 1, nil)
+	token.Wait()
+	// Check for errors during subscribe (More on error reporting https://pkg.go.dev/github.com/eclipse/paho.mqtt.golang#readme-error-handling)
+	if token.Error() != nil {
+		return token.Error()
+	}
+	return nil
+}
 
 // publish messages to the topic "topic/sensor"
 // with a frequency in Hz and amplitude in m
+//
+//lint:ignore U1000 placeholder for future usage
 func publish(client mqtt.Client, cfg config) error {
 	// publish the message "Message" to the topic "topic/test" 10 times in a for loop
 	ms := time.Millisecond * time.Duration(cfg.dt*1000)
