@@ -29,12 +29,15 @@ type triangle struct {
 type square struct {
 	amplitude float64
 	frequency float64
+	period    float64
 	t         float64
 	dt        float64
 	dx        float64
 	dy        float64
 	x         float64
 	y         float64
+	xm        float64
+	epsilon   float64
 	state     int
 }
 
@@ -71,17 +74,18 @@ func newTriangle(amplitude float64, frequency float64, dt float64) wave {
 
 func newSquare(amplitude float64, frequency float64, dt float64) wave {
 	var w square
-	w.frequency = frequency
 	w.amplitude = amplitude
+	w.frequency = frequency * (math.Pi * 2.0)
+	w.period = 1.0 / frequency
 	w.t = 0.0
 	w.dt = dt
-
-	w.state = 0
-	rate := 1.0 / dt
-	w.dx = rate / frequency
-	w.dy = w.amplitude * w.dx * 2.0 * math.Pi
+	w.dx = dt * (1.0 / frequency)
+	w.dy = amplitude
 	w.x = 0.0
 	w.y = 0.0
+	w.xm = 0.0
+	w.epsilon = w.dt / 2.0
+	w.state = 0
 	return &w
 }
 
@@ -91,6 +95,8 @@ func newWave(wavetype string, amplitude float64, frequency float64, dt float64) 
 		return newSin(amplitude, frequency, dt)
 	case "triangle":
 		return newTriangle(amplitude, frequency, dt)
+	case "square":
+		return newSquare(amplitude, frequency, dt)
 	default:
 		panic("unknown wave type")
 	}
@@ -135,32 +141,29 @@ func (w *triangle) step() (float64, float64, float64) {
 	return x, w.y, t
 }
 
-func (s *square) step() (float64, float64, float64) {
-	switch s.state {
+func (w *square) step() (float64, float64, float64) {
+	x := w.x
+	t := w.t
+	switch w.state {
 	case 0:
-		s.y = s.amplitude
-		s.state = 1
+		w.y = w.amplitude
+		w.xm = 0.0
+		w.state = 1
 	case 1:
-		s.x += s.dx
-		s.y += s.dy
-		if s.x >= s.amplitude {
-			s.y = s.amplitude
-			s.state = 2
+		if w.xm >= (w.period/2.0)-w.epsilon {
+			w.y = -w.amplitude
+			w.state = 2
 		}
 	case 2:
-		s.x += s.dx
-		s.y -= s.dy
-		if s.y <= -s.amplitude {
-			s.y = -s.amplitude
-			s.state = 3
-		}
-	case 3:
-		s.x += s.dx
-		s.y += s.dy
-		if s.y >= 0 {
-			s.state = 1
+		w.y = -w.amplitude
+		if w.xm >= w.period-w.epsilon {
+			w.xm = 0.0
+			w.y = w.amplitude
+			w.state = 1
 		}
 	}
-	s.t += s.dt
-	return s.x, s.y, s.t
+	w.t += w.dt
+	w.x += w.dx
+	w.xm += w.dt
+	return x, w.y, t
 }
