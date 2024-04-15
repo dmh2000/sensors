@@ -26,9 +26,9 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 	//fmt.Printf("Connection lost: %v", err)
 }
 
-func subscribe(client mqtt.Client) error {
+func subscribe(client mqtt.Client, cfg config) error {
 	// subscribe to the same topic, that was published to, to receive the messages
-	topic := "topic/sensor"
+	topic := fmt.Sprintf("waveform/%s", cfg.shape)
 	token := client.Subscribe(topic, 1, nil)
 	token.Wait()
 	// Check for errors during subscribe (More on error reporting https://pkg.go.dev/github.com/eclipse/paho.mqtt.golang#readme-error-handling)
@@ -44,14 +44,15 @@ func publish(client mqtt.Client, cfg config) error {
 	// publish the message "Message" to the topic "topic/test" 10 times in a for loop
 	ms := time.Millisecond * time.Duration(cfg.dt*1000)
 
-	w := newWave(cfg.wavetype, cfg.amplitude, cfg.frequency, cfg.dt)
+	w := newWave(cfg.shape, cfg.amplitude, cfg.frequency, cfg.dt)
 	for {
 		// step the simulation
 		x, y, t := w.step()
 
 		// format the message
 		text := fmt.Sprintf("%f,%f,%f,%f", cfg.dt, t, x, y)
-		token := client.Publish("topic/sensor", 0, false, text)
+		topic := fmt.Sprintf("waveform/%s", cfg.shape)
+		token := client.Publish(topic, 0, false, text)
 		token.Wait()
 		// Check for errors during publishing (More on error reporting https://pkg.go.dev/github.com/eclipse/paho.mqtt.golang#readme-error-handling)
 		if token.Error() != nil {

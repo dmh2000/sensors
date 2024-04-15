@@ -89,8 +89,8 @@ func newSquare(amplitude float64, frequency float64, dt float64) wave {
 	return &w
 }
 
-func newWave(wavetype string, amplitude float64, frequency float64, dt float64) wave {
-	switch wavetype {
+func newWave(shape string, amplitude float64, frequency float64, dt float64) wave {
+	switch shape {
 	case "sin":
 		return newSin(amplitude, frequency, dt)
 	case "triangle":

@@ -7,7 +7,7 @@ import (
 )
 
 type config struct {
-	wavetype  string
+	shape     string
 	frequency float64 // simulated wave frequency
 	amplitude float64 // simulated wave amplitude
 	dt        float64 // computed sample time dt
@@ -25,19 +25,19 @@ func readConfig() (config, error) {
 	if err != nil {
 		return cfg, fmt.Errorf("error loading config file")
 	}
-	wavetype := viper.Get("wavetype")
+	shape := viper.Get("shape")
 	frequency := viper.Get("frequency")
 	amplitude := viper.Get("amplitude")
 	rate := viper.Get("rate")
 	debug := viper.Get("debug")
 
-	if wavetype == nil || frequency == nil || amplitude == nil || rate == nil {
+	if shape == nil || frequency == nil || amplitude == nil || rate == nil {
 		return cfg, fmt.Errorf("missing configuration parameters")
 	}
 
-	w, ok := wavetype.(string)
+	w, ok := shape.(string)
 	if !ok {
-		return cfg, fmt.Errorf("config 'wavetype' is not a string")
+		return cfg, fmt.Errorf("config 'shape' is not a string")
 	}
 
 	f, ok := frequency.(float64)
