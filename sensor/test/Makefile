@@ -29,4 +29,7 @@ sin0505.jpg : FORCE
 	python3 plot.py sin0505.csv sin0505.jpg
 	xdg-open sin0505.jpg
 
+clean:
+	rm *.jpg *.csv
+	
 FORCE:	
