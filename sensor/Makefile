@@ -1,12 +1,12 @@
-build: sin triangle square
+build: build-sin build-triangle build-square
 
-sin:
+build-sin:
 	sudo docker build --no-cache -t sin-wave --build-arg SHAPE=config-sin.yaml .
 
-triangle:
+build-triangle:
 	sudo docker build --no-cache -t triangle-wave --build-arg SHAPE=config-triangle.yaml .
 
-square:
+build-square:
 	sudo docker build --no-cache -t square-wave --build-arg SHAPE=config-square.yaml .
 
 run-sin:

@@ -47,10 +47,10 @@ func publish(client mqtt.Client, cfg config) error {
 	w := newWave(cfg.shape, cfg.amplitude, cfg.frequency, cfg.dt)
 	for {
 		// step the simulation
-		x, y, t := w.step()
+		x, y, _ := w.step()
 
 		// format the message
-		text := fmt.Sprintf("%f,%f,%f,%f", cfg.dt, t, x, y)
+		text := fmt.Sprintf("%.3f,%.3f", x, y)
 		topic := fmt.Sprintf("waveform/%s", cfg.shape)
 		token := client.Publish(topic, 0, false, text)
 		token.Wait()

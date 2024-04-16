@@ -3,18 +3,17 @@ import csv
 import matplotlib.pyplot as plt
 
 wave = sys.argv[1]
-x = []
+fname = sys.argv[2]
 y = []
-z = []
+t = []
 with open(wave) as file:
     lines = csv.reader(file)
 
     for line in lines:
-        z.append(float(line[1]))        
-        x.append(float(line[2]))
-        y.append(float(line[3]))
+        t.append(float(line[0]))        
+        y.append(float(line[1]))
 
 
-plt.plot(x,y)
+plt.plot(t,y)
 plt.grid()
-plt.show()
+plt.savefig(fname)

@@ -4,13 +4,13 @@ import (
 	"math"
 )
 
+const pi2 = 2.0 * math.Pi
+
 type sin struct {
 	amplitude float64
 	frequency float64
 	t         float64
 	dt        float64
-	dx        float64
-	x         float64
 	y         float64
 }
 
@@ -49,11 +49,9 @@ func newSin(amplitude float64, frequency float64, dt float64) wave {
 	var w sin
 
 	w.amplitude = amplitude
-	w.frequency = frequency * (math.Pi * 2.0) // convert to radians/sec
+	w.frequency = frequency
 	w.t = 0.0
 	w.dt = dt
-	w.dx = dt * frequency
-	w.x = 0.0
 	w.y = 0.0
 	return &w
 }
@@ -104,11 +102,10 @@ func newWave(shape string, amplitude float64, frequency float64, dt float64) wav
 
 func (w *sin) step() (float64, float64, float64) {
 	t := w.t
-	x := w.x
-	w.y = w.amplitude * math.Sin(w.t*w.frequency)
+	tx := math.Mod(2, pi2) // to avoid loss of precision when t is very large
+	w.y = w.amplitude * math.Sin(tx*w.frequency*pi2)
 	w.t += w.dt
-	w.x += w.dx
-	return x, w.y, t
+	return w.dt, w.y, t
 }
 
 func (w *triangle) step() (float64, float64, float64) {
