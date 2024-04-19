@@ -13,7 +13,7 @@ dt = 1.0 / rate
 y = 0.0
 t = 0.0
 pi2 = 2 * math.pi
-
+period = 1.0 / frequency
 for i in range(0, rate * 4):
     tx = math.fmod(t,pi2) # to avoid loss of precision when t is large
     y = amplitude * math.sin(tx * frequency * pi2)

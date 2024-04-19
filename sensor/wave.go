@@ -33,7 +33,6 @@ type square struct {
 	t         float64
 	dt        float64
 	dx        float64
-	dy        float64
 	x         float64
 	y         float64
 	xm        float64
@@ -78,7 +77,6 @@ func newSquare(amplitude float64, frequency float64, dt float64) wave {
 	w.t = 0.0
 	w.dt = dt
 	w.dx = dt * (1.0 / frequency)
-	w.dy = amplitude
 	w.x = 0.0
 	w.y = 0.0
 	w.xm = 0.0

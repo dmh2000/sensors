@@ -1,16 +1,18 @@
-build: sin triangle square
+all: receiver  docker-build
 
-sin:
-	sudo docker build --no-cache -t sin-wave --build-arg SHAPE=config-sin.yaml .
+receiver: $(wildcard *.go)
+	staticcheck .
+	go build -o receiver
 
-triangle:
-	sudo docker build --no-cache -t triangle-wave --build-arg SHAPE=config-triangle.yaml .
+docker-build: 
+	sudo docker build --no-cache -t receiver .
 
-square:
-	sudo docker build --no-cache -t square-wave --build-arg SHAPE=config-square.yaml .
+docker-run:
+	sudo docker run -it --rm --name receiver receiver
 
-run:
-	sudo docker run -d --rm --name sin-wave sin-wave
-	sudo docker run -d --rm --name triangle-wave triangle-wave
-	sudo docker run -d --rm --name square-wave square-wave
 
+docker-kill:
+	sudo docker ps -a -q | xargs sudo docker kill	
+
+clean:
+	rm receiver

@@ -12,6 +12,7 @@ type config struct {
 	amplitude float64 // simulated wave amplitude
 	dt        float64 // computed sample time dt
 	debug     bool    // debug flag
+	name      string  // client name
 }
 
 func readConfig() (config, error) {
@@ -30,6 +31,7 @@ func readConfig() (config, error) {
 	amplitude := viper.Get("amplitude")
 	rate := viper.Get("rate")
 	debug := viper.Get("debug")
+	name := viper.Get("name")
 
 	if shape == nil || frequency == nil || amplitude == nil || rate == nil {
 		return cfg, fmt.Errorf("missing configuration parameters")
@@ -58,10 +60,15 @@ func readConfig() (config, error) {
 		return cfg, fmt.Errorf("config 'debug' is not a bool")
 	}
 
+	n, ok := name.(string)
+	if !ok {
+		return cfg, fmt.Errorf("config 'name' is not a string")
+	}
+
 	// computer delta T in fractional seconds
 	dt := 1.0 / float64(r)
 
-	cfg = config{w, f, a, dt, p}
+	cfg = config{w, f, a, dt, p, n}
 
 	return cfg, nil
 }

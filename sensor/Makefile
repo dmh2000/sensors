@@ -1,12 +1,23 @@
-build: build-sin build-triangle build-square
+all: sensor docker-build
 
-build-sin:
+sensor: $(wildcard *.go)
+	staticcheck .
+	go build -o sensor
+
+docker-build: docker-sin docker-triangle docker-square
+
+docker-run: run-sin run-triangle run-square
+
+docker-kill:
+	sudo docker ps -a -q | xargs sudo docker kill	
+
+docker-sin:
 	sudo docker build --no-cache -t sin-wave --build-arg SHAPE=config-sin.yaml .
 
-build-triangle:
+docker-triangle:
 	sudo docker build --no-cache -t triangle-wave --build-arg SHAPE=config-triangle.yaml .
 
-build-square:
+docker-square:
 	sudo docker build --no-cache -t square-wave --build-arg SHAPE=config-square.yaml .
 
 run-sin:
@@ -18,5 +29,5 @@ run-triangle:
 run-square:	
 	sudo docker run -d --rm --name square-wave square-wave
 
-kill-all:
-	sudo docker ps -a -q | xargs sudo docker kill	
+clean:
+	rm sensor
