@@ -1,9 +1,9 @@
 # frequency in Hz (cycles/sec): must be float d.d+
-frequency: 1.0
+frequency: 0.1
 # amplitude in m : must be float d.d+
 amplitude: 1.0
 # sample rate in samples/second : must be float d.d+
-rate: 20.0
+rate: 5.0
 # log mode : must be boolean true|false
 debug: true
 # type : sin square triangle sawtooth : must be string

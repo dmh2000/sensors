@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-const pi2 = 2.0 * math.Pi
+const twopi = 2.0 * math.Pi
 
 type sin struct {
 	amplitude float64
@@ -98,13 +98,14 @@ func newWave(shape string, amplitude float64, frequency float64, dt float64) wav
 	}
 }
 
-func (w *sin) step() (float64, float64, float64) {
+func (w *sin) step() (dt float64, y float64, t float64) {
 	tx := w.t
-	if tx >= pi2 {
-		tx -= pi2
+	// avoid overflow and loss of precision
+	if tx >= twopi {
+		tx -= twopi
 	}
 
-	w.y = w.amplitude * math.Sin(tx*w.frequency*pi2)
+	w.y = w.amplitude * math.Sin(tx*w.frequency*twopi)
 	w.t += w.dt
 	return w.dt, w.y, w.t
 }
