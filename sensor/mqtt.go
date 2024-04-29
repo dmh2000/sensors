@@ -39,7 +39,7 @@ func publishMQTT(client mqtt.Client, cfg config) error {
 
 		// format the message
 		text := fmt.Sprintf("%.3f,%.3f", x, y)
-		topic := fmt.Sprintf("waveform/%s", cfg.shape)
+		topic := fmt.Sprintf("w/%s", cfg.shape)
 		token := client.Publish(topic, 0, false, text)
 		token.Wait()
 		// Check for errors during publishing (More on error reporting https://pkg.go.dev/github.com/eclipse/paho.mqtt.golang#readme-error-handling)

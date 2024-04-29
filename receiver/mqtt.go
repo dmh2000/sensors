@@ -10,7 +10,8 @@ import (
 func messagePubHandlerFunc(debug bool) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		if debug {
-			fmt.Printf("%s,%s\r", msg.Topic(), msg.Payload())
+			// fmt.Printf("%s,%s\n", msg.Topic(), msg.Payload())
+			fmt.Printf("%s\n", msg.Payload())
 		}
 	}
 }

@@ -82,19 +82,19 @@ func subscriber(pipe chan string) {
 	defer client.Disconnect(250)
 
 	// add suscriptions
-	err = subscribeMQTT(client, "waveform/sin")
+	err = subscribeMQTT(client, "w/sin")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(3)
 	}
 
-	err = subscribeMQTT(client, "waveform/square")
+	err = subscribeMQTT(client, "w/square")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(3)
 	}
 
-	err = subscribeMQTT(client, "waveform/triangle")
+	err = subscribeMQTT(client, "w/triangle")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(3)

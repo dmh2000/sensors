@@ -22,12 +22,12 @@ func rabbitConsumer() error {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"hello", // name
-		false,   // durable
-		false,   // delete when unused
-		false,   // exclusive
-		false,   // no-wait
-		nil,     // arguments
+		"waveforms", // name
+		false,       // durable
+		false,       // delete when unused
+		false,       // exclusive
+		false,       // no-wait
+		nil,         // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
@@ -42,11 +42,9 @@ func rabbitConsumer() error {
 	)
 	failOnError(err, "Failed to register a consumer")
 
-	go func() {
-		for d := range msgs {
-			log.Printf("Received a message: %s", d.Body)
-		}
-	}()
+	for msg := range msgs {
+		log.Printf("%s\n", msg.Body)
+	}
 
 	return nil
 }

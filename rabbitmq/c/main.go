@@ -9,10 +9,12 @@ import (
 
 func main() {
 
-	err := rabbitConsumer()
-	if err != nil {
-		log.Fatalf("Error RabbitMQ setup: %s", err)
-	}
+	go func() {
+		err := rabbitConsumer()
+		if err != nil {
+			log.Fatalf("Error RabbitMQ setup: %s", err)
+		}
+	}()
 
 	// block until user hits ctrl+c
 	done := make(chan os.Signal, 1)

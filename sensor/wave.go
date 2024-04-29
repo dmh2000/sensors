@@ -99,11 +99,14 @@ func newWave(shape string, amplitude float64, frequency float64, dt float64) wav
 }
 
 func (w *sin) step() (float64, float64, float64) {
-	t := w.t
-	tx := math.Mod(2, pi2) // to avoid loss of precision when t is very large
+	tx := w.t
+	if tx >= pi2 {
+		tx -= pi2
+	}
+
 	w.y = w.amplitude * math.Sin(tx*w.frequency*pi2)
 	w.t += w.dt
-	return w.dt, w.y, t
+	return w.dt, w.y, w.t
 }
 
 func (w *triangle) step() (float64, float64, float64) {
