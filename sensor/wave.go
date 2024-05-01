@@ -41,7 +41,7 @@ type square struct {
 }
 
 type wave interface {
-	step() (float64, float64, float64)
+	step() (x float64, y float64)
 }
 
 func newSin(amplitude float64, frequency float64, dt float64) wave {
@@ -98,20 +98,20 @@ func newWave(shape string, amplitude float64, frequency float64, dt float64) wav
 	}
 }
 
-func (w *sin) step() (dt float64, y float64, t float64) {
+func (w *sin) step() (x float64, y float64) {
 	tx := w.t
 	// avoid overflow and loss of precision
 	if tx >= twopi {
 		tx -= twopi
 	}
 
+	// advance for next step
 	w.y = w.amplitude * math.Sin(tx*w.frequency*twopi)
 	w.t += w.dt
-	return w.dt, w.y, w.t
+	return tx, w.y
 }
 
-func (w *triangle) step() (float64, float64, float64) {
-	x := w.x
+func (w *triangle) step() (x float64, y float64) {
 	t := w.t
 	switch w.state {
 	case 0:
@@ -135,13 +135,13 @@ func (w *triangle) step() (float64, float64, float64) {
 			w.state = 1
 		}
 	}
+	// advance for next step
 	w.t += w.dt
 	w.x += w.dx
-	return x, w.y, t
+	return t, w.y
 }
 
-func (w *square) step() (float64, float64, float64) {
-	x := w.x
+func (w *square) step() (x float64, y float64) {
 	t := w.t
 	switch w.state {
 	case 0:
@@ -161,8 +161,9 @@ func (w *square) step() (float64, float64, float64) {
 			w.state = 1
 		}
 	}
+	// advance for next step
 	w.t += w.dt
 	w.x += w.dx
 	w.xm += w.dt
-	return x, w.y, t
+	return t, w.y
 }

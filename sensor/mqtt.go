@@ -35,7 +35,7 @@ func publishMQTT(client mqtt.Client, cfg config) error {
 	w := newWave(cfg.shape, cfg.amplitude, cfg.frequency, cfg.dt)
 	for {
 		// step the simulation
-		x, y, _ := w.step()
+		x, y := w.step()
 
 		// format the message
 		text := fmt.Sprintf("%.3f,%.3f", x, y)

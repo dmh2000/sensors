@@ -14,6 +14,7 @@ import (
 func messagePubHandlerFunc(ch chan string) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		rbq := fmt.Sprintf("%s,%s", msg.Topic(), msg.Payload())
+		// send to producer
 		ch <- rbq
 	}
 }
