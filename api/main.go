@@ -44,22 +44,22 @@ func main() {
 
 	router.HandleFunc("GET /sensor/v1/sin", func(w http.ResponseWriter, r *http.Request) {
 		// return latest sin wave
-		fmt.Fprintf(w, "%s,%s", sinX, sinY)
+		fmt.Fprintf(w, "sin,%s,%s", sinX, sinY)
 	})
 
 	router.HandleFunc("GET /sensor/v1/square", func(w http.ResponseWriter, r *http.Request) {
 		// return latest square wave
-		fmt.Fprintf(w, "%s,%s", squareX, squareY)
+		fmt.Fprintf(w, "square,%s,%s", squareX, squareY)
 	})
 
 	router.HandleFunc("GET /sensor/v1/triangle", func(w http.ResponseWriter, r *http.Request) {
 		// return latest triangle wave
-		fmt.Fprintf(w, "%s,%s", triangleX, triangleY)
+		fmt.Fprintf(w, "triangle,%s,%s", triangleX, triangleY)
 	})
 
 	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Welcome to the sensor API")
 	})
 
-	http.ListenAndServe("localhost:8080", router)
+	http.ListenAndServe("localhost:8081", router)
 }
