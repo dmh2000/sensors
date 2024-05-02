@@ -57,9 +57,9 @@ func main() {
 		fmt.Fprintf(w, "triangle,%s,%s", triangleX, triangleY)
 	})
 
-	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Welcome to the sensor API")
 	})
 
-	http.ListenAndServe("localhost:8081", router)
+	http.ListenAndServe(":8002", router)
 }

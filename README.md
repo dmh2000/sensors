@@ -1,39 +1,58 @@
 # Streaming Sensor Example
 
-## Sensors
+<img src="sensors.svg"></img>
+
+Items with dotted lines are not implemented yet.
+
+## Sensors (simulated)
 
 - go
 - github.com/eclipse/paho.mqtt.golang
+- generates configurable wave forms
+- docker images
+  - sin
+  - square
+  - triangle
 
 ## MQTT Broker
 
-- HiveMQ : https://www.hivemq.com/
+- HiveMQ
+  - free tier
+  - https://www.hivemq.com/
 
 ## MQTT - RabbitMQ Bridge
 
 - go
 - github.com/eclipse/paho.mqtt.golang
+- github.com/rabbitmq/amqp091-go
 
 ## RabbitMQ Server
+
+- rabbitMQ standard docker image
+  - https://hub.docker.com/_/rabbitmq
 
 ## API Server
 
 - go
+- net/http server
 - github.com/rabbitmq/amqp091-go
 
 ## Dashboard Backend
 
-- nextjs
-- typescript
+- go
+  - net/http server
+  - html/template
 
 ## Dashboard Frontend
 
-- react
-- typescript
+- hxml SPA
 
-## Tests
+### Test
 
-### MQTT Receiver
-
-- go
-- github.com/eclipse/paho.mqtt.golang
+- MQTT Receiver Test
+  - go
+  - paho client
+    - github.com/eclipse/paho.mqtt.golang
+- RabbitMQ Receiver Test
+  - python
+  - pika client

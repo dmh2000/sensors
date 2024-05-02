@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -13,8 +15,29 @@ func failOnError(err error, msg string) {
 }
 
 func rabbitConsumer(c chan string) {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	failOnError(err, "Failed to connect to RabbitMQ")
+	var conn *amqp.Connection
+	var err error
+	for {
+		// is it running in docker?
+		conn, err = amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
+		if err == nil {
+			fmt.Println("API running in docker")
+			break
+		}
+		fmt.Printf("API Not running in docker : %s\n", err)
+
+		// is it running locally?
+		conn, err = amqp.Dial("amqp://guest:guest@localhost:5672/")
+		if err == nil {
+			fmt.Println("API Running in localhost")
+			break
+		}
+		fmt.Printf("API not running locally : %s\n", err)
+
+		// wait and retry
+		time.Sleep(5 * time.Second)
+		fmt.Println("API reconnecting to RabbitMQ")
+	}
 	defer conn.Close()
 
 	ch, err := conn.Channel()
