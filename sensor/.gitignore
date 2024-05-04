@@ -1,2 +1,5 @@
 *.csv
-sensor
+.env
+sin-wave
+triangle-wave
+square-wave

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -23,32 +22,32 @@ func main() {
 	// load configuration
 	cfg, err := readConfig()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 
 	client, err := setupMQTT(cfg, user, pwd, brk)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(5)
 	}
 
 	// add suscriptions
 	err = subscribeMQTT(client, "w/sin")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(3)
 	}
 
 	err = subscribeMQTT(client, "w/square")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(3)
 	}
 
 	err = subscribeMQTT(client, "w/triangle")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(3)
 	}
 

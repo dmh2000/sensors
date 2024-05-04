@@ -1,4 +1,10 @@
 services:
+  mosquitto:
+    build: mosquitto
+    ports:
+      - "1883:1883"
+    networks:
+      - sensor
   rabbitmq:
     image: rabbitmq:3.13-management
     ports:
@@ -6,12 +12,17 @@ services:
       - "15672:15672"
     networks:
       - sensor
+  bridge:
+    build: bridge
+    depends_on:
+      - rabbitmq
+      - mosquitto
+    networks:
+      - sensor
   api:
     build: api
     ports:
       - "8002:8002"
-    links:
-      - "rabbitmq:rabbitmq"
     depends_on:
       - rabbitmq
     networks:

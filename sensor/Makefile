@@ -1,9 +1,25 @@
-all: sensor docker-build
+sensors: sin-wave triangle-wave square-wave
 
-sensor: $(wildcard *.go)
-	@echo "===================================== Building sensor"
+sin-wave: FORCE
+	@echo build sin-wave
 	staticcheck .
-	go build -o sensor
+	cp config-sin.yaml config.yaml
+	go build -o sin-wave
+	./sin-wave &
+
+triangle-wave: FORCE
+	@echo build triangle-wave
+	staticcheck .
+	cp config-triangle.yaml config.yaml
+	go build -o triangle-wave
+	./triangle-wave &
+
+square-wave: FORCE
+	@echo build square-wave
+	staticcheck .
+	cp config-square.yaml config.yaml
+	go build -o square-wave
+	./square-wave &
 
 docker-build: docker-sin docker-triangle docker-square
 
@@ -36,4 +52,6 @@ run-square:
 
 clean:
 	@echo "=====================================  Cleaning sensor"
-	-rm sensor
+	-rm sin-wave square-wave triangle-wave
+
+FORCE:

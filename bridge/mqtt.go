@@ -10,7 +10,7 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-// returns a callback function that will print the received message if 'debug' is true
+// receive msgs from mqtt and forward to the rabbitmq producer
 func messagePubHandlerFunc(ch chan string) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		rbq := fmt.Sprintf("%s,%s", msg.Topic(), msg.Payload())
@@ -21,17 +21,17 @@ func messagePubHandlerFunc(ch chan string) mqtt.MessageHandler {
 
 // upon connection to the client, this is called
 var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
-	fmt.Println("Connected")
+	log.Println("Connected")
 }
 
 // this is called when the connection to the client is lost, it prints "Connection lost" and the corresponding error
 var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
-	//fmt.Printf("Connection lost: %v", err)
+	//log.Printf("Connection lost: %v", err)
 }
 
 func subscribeMQTT(client mqtt.Client, topic string) error {
 	// subscribe to the same topic, that was published to, to receive the messages
-	fmt.Println("subscribing to topic: ", topic)
+	log.Println("subscribing to topic: ", topic)
 	token := client.Subscribe(topic, 1, nil)
 	token.Wait()
 	// Check for errors during subscribe (More on error reporting https://pkg.go.dev/github.com/eclipse/paho.mqtt.golang#readme-error-handling)
@@ -41,15 +41,21 @@ func subscribeMQTT(client mqtt.Client, topic string) error {
 	return nil
 }
 
-func setupMQTT(pipe chan string, user string, pwd string, brk string) (mqtt.Client, error) {
+func setupMQTT(pipe chan string, user string, pwd string, url string, id string) (mqtt.Client, error) {
 	// initialize the client
-	var broker = brk
-	var port = 8883
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("tls://%s:%d", broker, port))
-	opts.SetClientID("receiver") // set a name as you desire
+	opts.AddBroker(url)
+	opts.SetClientID(id) // set a name as you desire
 	opts.SetUsername(user)
 	opts.SetPassword(pwd)
+
+	opts.AddBroker(url)
+	opts.SetClientID(id) // set a name as you desire
+
+	if user != "" && pwd != "" {
+		opts.SetUsername(user)
+		opts.SetPassword(pwd)
+	}
 
 	// callback for subscribed messages
 	opts.SetDefaultPublishHandler(messagePubHandlerFunc(pipe))
@@ -67,6 +73,7 @@ func setupMQTT(pipe chan string, user string, pwd string, brk string) (mqtt.Clie
 		return nil, token.Error()
 	}
 
+	log.Println("Connected to MQTT broker")
 	return client, nil
 }
 
@@ -74,9 +81,9 @@ func subscriber(pipe chan string) {
 	// setup mqtt receiver
 	user := os.Getenv("userid")
 	pwd := os.Getenv("pwd")
-	brk := os.Getenv("broker")
+	url := os.Getenv("url")
 
-	client, err := setupMQTT(pipe, user, pwd, brk)
+	client, err := setupMQTT(pipe, user, pwd, url, "bridge")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -85,19 +92,19 @@ func subscriber(pipe chan string) {
 	// add suscriptions
 	err = subscribeMQTT(client, "w/sin")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(3)
 	}
 
 	err = subscribeMQTT(client, "w/square")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(3)
 	}
 
 	err = subscribeMQTT(client, "w/triangle")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(3)
 	}
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -21,22 +20,22 @@ func rabbitConsumer(c chan string) {
 		// is it running in docker?
 		conn, err = amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
 		if err == nil {
-			fmt.Println("API running in docker")
+			log.Println("API running in docker")
 			break
 		}
-		fmt.Printf("API Not running in docker : %s\n", err)
+		log.Printf("API Not running in docker : %s\n", err)
 
 		// is it running locally?
 		conn, err = amqp.Dial("amqp://guest:guest@localhost:5672/")
 		if err == nil {
-			fmt.Println("API Running in localhost")
+			log.Println("API Running in localhost")
 			break
 		}
-		fmt.Printf("API not running locally : %s\n", err)
+		log.Printf("API not running locally : %s\n", err)
 
 		// wait and retry
 		time.Sleep(5 * time.Second)
-		fmt.Println("API reconnecting to RabbitMQ")
+		log.Println("API reconnecting to RabbitMQ")
 	}
 	defer conn.Close()
 

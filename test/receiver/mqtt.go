@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
@@ -10,25 +11,25 @@ import (
 func messagePubHandlerFunc(debug bool) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		if debug {
-			// fmt.Printf("%s,%s\n", msg.Topic(), msg.Payload())
-			fmt.Printf("%s\n", msg.Payload())
+			// log.Printf("%s,%s\n", msg.Topic(), msg.Payload())
+			log.Printf("%s\n", msg.Payload())
 		}
 	}
 }
 
 // upon connection to the client, this is called
 var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
-	fmt.Println("Connected")
+	log.Println("Connected")
 }
 
 // this is called when the connection to the client is lost, it prints "Connection lost" and the corresponding error
 var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
-	//fmt.Printf("Connection lost: %v", err)
+	//log.Printf("Connection lost: %v", err)
 }
 
 func subscribeMQTT(client mqtt.Client, topic string) error {
 	// subscribe to the same topic, that was published to, to receive the messages
-	fmt.Println("subscribing to topic: ", topic)
+	log.Println("subscribing to topic: ", topic)
 	token := client.Subscribe(topic, 1, nil)
 	token.Wait()
 	// Check for errors during subscribe (More on error reporting https://pkg.go.dev/github.com/eclipse/paho.mqtt.golang#readme-error-handling)

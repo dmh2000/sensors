@@ -35,7 +35,7 @@ func main() {
 				triangleX = s[1]
 				triangleY = s[2]
 			}
-			fmt.Printf("%s,%s,%s,%s,%s,%s\n", sinX, sinY, squareX, squareY, triangleX, triangleY)
+			// log.Printf("%s,%s,%s,%s,%s,%s\n", sinX, sinY, squareX, squareY, triangleX, triangleY)
 		}
 	}()
 

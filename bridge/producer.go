@@ -15,11 +15,33 @@ func failOnError(err error, msg string) {
 }
 
 func producer(pipe chan string) {
-	// setup rabbitmq producer
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	failOnError(err, "Failed to connect to RabbitMQ")
+	var conn *amqp.Connection
+	var err error
+	// connect to RabbitMQ
+	for {
+		// is it running in docker?
+		conn, err = amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
+		if err == nil {
+			log.Println("API running in docker")
+			break
+		}
+		log.Printf("API Not running in docker : %s\n", err)
+
+		// is it running locally?
+		conn, err = amqp.Dial("amqp://guest:guest@localhost:5672/")
+		if err == nil {
+			log.Println("API Running in localhost")
+			break
+		}
+		log.Printf("API not running locally : %s\n", err)
+
+		// wait and retry
+		time.Sleep(5 * time.Second)
+		log.Println("API reconnecting to RabbitMQ")
+	}
 	defer conn.Close()
 
+	// open a channel
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
@@ -37,6 +59,7 @@ func producer(pipe chan string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	// receive messages from MQTT and publish to RabbitMQ
 	for msg := range pipe {
 		body := msg
 		err = ch.PublishWithContext(ctx,

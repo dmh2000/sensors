@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -16,25 +15,26 @@ func main() {
 	}
 	user := os.Getenv("userid")
 	pwd := os.Getenv("pwd")
-	brk := os.Getenv("broker")
+	url := os.Getenv("url")
 
 	// load configuration
 	cfg, err := readConfig()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 
-	client, err := setupMQTT(cfg, user, pwd, brk)
+	log.Println(cfg, user, pwd, url)
+	client, err := setupMQTT(cfg, user, pwd, url, "")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(5)
 	}
 
 	// add publications, does not return unless there is an error
 	err = publishMQTT(client, cfg)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(4)
 	}
 

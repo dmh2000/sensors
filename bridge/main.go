@@ -11,11 +11,10 @@ import (
 
 func main() {
 	// load secrets
-	err := godotenv.Load("../../.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file: ", err)
 	}
-
 	// pipe between mqtt receiver and rabbitmq producer
 	pipe := make(chan string, 10)
 

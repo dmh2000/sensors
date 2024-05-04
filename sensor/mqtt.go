@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -11,19 +12,19 @@ import (
 func messagePubHandlerFunc(debug bool) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		if debug {
-			fmt.Printf("%s,%s\r", msg.Topic(), msg.Payload())
+			log.Printf("%s,%s\r", msg.Topic(), msg.Payload())
 		}
 	}
 }
 
 // upon connection to the client, this is called
 var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
-	//fmt.Println("Connected")
+	//log.Println("Connected")
 }
 
 // this is called when the connection to the client is lost, it prints "Connection lost" and the corresponding error
 var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
-	//fmt.Printf("Connection lost: %v", err)
+	//log.Printf("Connection lost: %v", err)
 }
 
 // publishMQTT messages to the topic "topic/sensor"
@@ -31,6 +32,7 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 func publishMQTT(client mqtt.Client, cfg config) error {
 	// publish the message "Message" to the topic "topic/test" 10 times in a for loop
 	ms := time.Millisecond * time.Duration(cfg.dt*1000)
+	ticker := time.NewTicker(ms)
 
 	w := newWave(cfg.shape, cfg.amplitude, cfg.frequency, cfg.dt)
 	for {
@@ -44,21 +46,24 @@ func publishMQTT(client mqtt.Client, cfg config) error {
 		token.Wait()
 		// Check for errors during publishing (More on error reporting https://pkg.go.dev/github.com/eclipse/paho.mqtt.golang#readme-error-handling)
 		if token.Error() != nil {
-			return token.Error()
+			log.Println(token.Error())
 		}
-		time.Sleep(ms)
+
+		<-ticker.C
 	}
 }
 
-func setupMQTT(cfg config, user string, pwd string, brk string) (mqtt.Client, error) {
+func setupMQTT(cfg config, user string, pwd string, url string, id string) (mqtt.Client, error) {
 	// initialize the client
-	var broker = brk // find the host name in the Overview of your cluster (see readme)
-	var port = 8883  // find the port right under the host name, standard is 8883
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("tls://%s:%d", broker, port))
+	opts.AddBroker(url)
 	opts.SetClientID(cfg.name) // set a name as you desire
-	opts.SetUsername(user)
-	opts.SetPassword(pwd)
+
+	// set username and password if provided
+	if user != "" && pwd != "" {
+		opts.SetUsername(user)
+		opts.SetPassword(pwd)
+	}
 
 	// callback for subscribed messages
 	opts.SetDefaultPublishHandler(messagePubHandlerFunc(cfg.debug))
@@ -73,8 +78,9 @@ func setupMQTT(cfg config, user string, pwd string, brk string) (mqtt.Client, er
 	client := mqtt.NewClient(opts)
 	// throw an error if the connection isn't successfull
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		return nil, token.Error()
+		return nil, fmt.Errorf("mqtt connect:%s", token.Error())
 	}
+	log.Println("Connected to MQTT broker")
 
 	return client, nil
 }

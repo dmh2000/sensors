@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"io"
 	"log"
@@ -32,14 +31,14 @@ func fetchApiWave(url string) (Wave, error) {
 	// fetch the api data
 	api, err := http.Get(url)
 	if err != nil {
-		fmt.Printf("Error fetching %s wave data: %s\n", url, err)
+		log.Printf("Error fetching %s wave data: %s\n", url, err)
 		return w, err
 	}
 	defer api.Body.Close()
 
 	body, err := io.ReadAll(api.Body)
 	if err != nil {
-		fmt.Printf("Error reading %s wave data: %s\n", url, err)
+		log.Printf("Error reading %s wave data: %s\n", url, err)
 		return w, err
 	}
 
@@ -72,29 +71,29 @@ func main() {
 
 	router.HandleFunc("GET /update", func(w http.ResponseWriter, r *http.Request) {
 
-		sin, err := fetchApiWave("http://localhost:8002/sensor/v1/sin")
+		sin, err := fetchApiWave("http://api:8002/sensor/v1/sin")
 		if err != nil {
 			log.Printf("Error fetching sin wave data: %s\n", err)
 		}
-		fmt.Printf("sin: %v\n", sin)
+		// log.Printf("sin: %v\n", sin)
 		waves.Sin.X = sin.X
 		waves.Sin.Y = sin.Y
 		waves.Sin.W = sin.W
 
-		sqr, err := fetchApiWave("http://localhost:8002/sensor/v1/square")
+		sqr, err := fetchApiWave("http://api:8002/sensor/v1/square")
 		if err != nil {
 			log.Printf("Error fetching square wave data: %s\n", err)
 		}
-		fmt.Printf("sqr: %v\n", sqr)
+		// log.Printf("sqr: %v\n", sqr)
 		waves.Sqr.X = sqr.X
 		waves.Sqr.Y = sqr.Y
 		waves.Sqr.W = sqr.W
 
-		tri, err := fetchApiWave("http://localhost:8002/sensor/v1/triangle")
+		tri, err := fetchApiWave("http://api:8002/sensor/v1/triangle")
 		if err != nil {
 			log.Printf("Error fetching triangle wave data: %s\n", err)
 		}
-		fmt.Printf("tri: %v\n", tri)
+		// log.Printf("tri: %v\n", tri)
 		waves.Tri.X = tri.X
 		waves.Tri.Y = tri.Y
 		waves.Tri.W = tri.W
@@ -113,5 +112,5 @@ func main() {
 		}
 	})
 
-	http.ListenAndServe("localhost:8001", router)
+	http.ListenAndServe(":8001", router)
 }
