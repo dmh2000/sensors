@@ -15,11 +15,11 @@ type config struct {
 	name      string  // client name
 }
 
-func readConfig() (config, error) {
+func readConfig(configFile string) (config, error) {
 	var cfg config
 
 	// load configuration
-	viper.SetConfigName("config")
+	viper.SetConfigName(configFile)
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()

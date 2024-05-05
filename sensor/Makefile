@@ -5,21 +5,21 @@ sin-wave: FORCE
 	staticcheck .
 	cp config-sin.yaml config.yaml
 	go build -o sin-wave
-	./sin-wave &
+	./sin-wave config-sin.yaml &
 
 triangle-wave: FORCE
 	@echo build triangle-wave
 	staticcheck .
 	cp config-triangle.yaml config.yaml
 	go build -o triangle-wave
-	./triangle-wave &
+	./triangle-wave config-triangle.yaml &
 
 square-wave: FORCE
 	@echo build square-wave
 	staticcheck .
 	cp config-square.yaml config.yaml
 	go build -o square-wave
-	./square-wave &
+	./square-wave config-square.yaml &
 
 docker-build: docker-sin docker-triangle docker-square
 
