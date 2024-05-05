@@ -5,25 +5,33 @@ sin-wave: FORCE
 	staticcheck .
 	cp config-sin.yaml config.yaml
 	go build -o sin-wave
-	./sin-wave config-sin.yaml &
 
 triangle-wave: FORCE
 	@echo build triangle-wave
 	staticcheck .
 	cp config-triangle.yaml config.yaml
 	go build -o triangle-wave
-	./triangle-wave config-triangle.yaml &
 
 square-wave: FORCE
 	@echo build square-wave
 	staticcheck .
 	cp config-square.yaml config.yaml
 	go build -o square-wave
-	./square-wave config-square.yaml &
+
+run: run-sin run-triangle run-square
+
+run-sin:
+	./sin-wave config-sin.yaml &
+
+run-triangle:
+	./triangle-wave config-triangle.yaml &
+
+run-square:	
+	./square-wave config-square.yaml &	
 
 docker-build: docker-sin docker-triangle docker-square
 
-docker-run: run-sin run-triangle run-square
+docker-run: docker-run-sin docker-run-triangle docker-run-square
 
 docker-kill:
 	@echo "===================================== Killing all containers"
@@ -41,13 +49,15 @@ docker-square:
 	@echo "===================================== Building square-wave docker image"
 	sudo docker build --quiet --no-cache -t square-wave --build-arg SHAPE=config-square.yaml .
 
-run-sin:
+
+
+docker-run-sin:
 	sudo docker run -d --rm --name sin-wave sin-wave
 
-run-triangle:
+docker-docker-run-triangle:
 	sudo docker run -d --rm --name triangle-wave triangle-wave
 
-run-square:	
+docker-docker-run-square:	
 	sudo docker run -d --rm --name square-wave square-wave
 
 clean:
