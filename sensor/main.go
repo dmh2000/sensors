@@ -33,7 +33,7 @@ func main() {
 	fmt.Printf("SENSOR,%s,%s.yaml,%v\n", url, configFile, cfg)
 
 	log.Println(cfg, user, pwd, url)
-	client, err := setupMQTT(cfg, user, pwd, url, "")
+	client, err := setupMQTT(cfg, user, pwd, url)
 	if err != nil {
 		log.Println(err)
 		os.Exit(5)
