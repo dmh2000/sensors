@@ -7,13 +7,16 @@ build:
 	$(MAKE) -C dashboard
 
 docker-build:
+	$(MAKE) -C rabbitmq docker-build
 	$(MAKE) -C sensor docker-build
+	$(MAKE) -C mosquitto docker-build
 	$(MAKE) -C bridge docker-build
 	$(MAKE) -C api docker-build
 	$(MAKE) -C dashboard docker-build
 
 docker-run:
-	$(MAKE) -C rabbitmq rabbit
+	$(MAKE) -C rabbitmq docker-run
+	$(MAKE) -C mosquitto docker-run
 	$(MAKE) -C sensor docker-run
 	$(MAKE) -C bridge docker-run
 	$(MAKE) -C api docker-run

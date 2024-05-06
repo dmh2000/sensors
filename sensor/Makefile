@@ -29,7 +29,7 @@ run-triangle:
 run-square:	
 	./square-wave config-square.yaml &	
 
-docker-build: docker-sin docker-triangle docker-square
+docker-build: docker-build-sin docker-build-triangle docker-build-square
 
 docker-run: docker-run-sin docker-run-triangle docker-run-square
 
@@ -37,27 +37,28 @@ docker-kill:
 	@echo "===================================== Killing all containers"
 	sudo docker ps -a -q | xargs sudo docker kill	
 
-docker-sin:
+docker-build-sin:
 	@echo "===================================== Building sin-wave docker image"
+	staticcheck .
 	sudo docker build --quiet --no-cache -t sin-wave --build-arg SHAPE=config-sin.yaml .
 
-docker-triangle:
+docker-build-triangle:
 	@echo "===================================== Building triangle-wave docker image"
+	staticcheck .
 	sudo docker build --quiet --no-cache -t triangle-wave --build-arg SHAPE=config-triangle.yaml .
 
-docker-square:
+docker-build-square:
 	@echo "===================================== Building square-wave docker image"
+	staticcheck .
 	sudo docker build --quiet --no-cache -t square-wave --build-arg SHAPE=config-square.yaml .
-
-
 
 docker-run-sin:
 	sudo docker run -d --rm --name sin-wave sin-wave
 
-docker-docker-run-triangle:
+docker-run-triangle:
 	sudo docker run -d --rm --name triangle-wave triangle-wave
 
-docker-docker-run-square:	
+docker-run-square:	
 	sudo docker run -d --rm --name square-wave square-wave
 
 clean:

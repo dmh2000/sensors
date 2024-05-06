@@ -1,5 +1,8 @@
-all: rabbit 
+all: docker-run 
 
-rabbit:
+docker-build:
+	@echo nothing to do for rabbitmq
+
+docker-run:
 	sudo docker run -d --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.13-management
 

@@ -37,6 +37,24 @@ services:
       - "api:api"
     networks:
       - sensor
+  sin-wave:
+    image: sin-wave
+    depends_on:
+      - mosquitto
+    networks:
+      - sensor
+  triangle-wave:
+    image: triangle-wave
+    depends_on:
+      - mosquitto
+    networks:
+      - sensor
+  square-wave:
+    image: square-wave
+    depends_on:
+      - mosquitto
+    networks:
+      - sensor
 networks:
   sensor:
     name: sensor

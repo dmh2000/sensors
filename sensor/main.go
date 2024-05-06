@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"os"
 
@@ -30,7 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("SENSOR,%s,%s.yaml,%v\n", url, configFile, cfg)
+	log.Printf("SENSOR,%s,%s.yaml,%v\n", url, configFile, cfg)
 
 	client, err := setupMQTT(cfg, user, pwd, url)
 	if err != nil {
@@ -39,7 +39,10 @@ func main() {
 	}
 
 	// add publications, does not return unless there is an error
-	err = publishMQTT(client, cfg)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	err = publishMQTT(ctx, client, cfg)
 	if err != nil {
 		log.Println(err)
 		os.Exit(4)
