@@ -22,18 +22,18 @@ func producer(pipe chan string) {
 		// is it running in docker?
 		conn, err = amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
 		if err == nil {
-			log.Println("API running in docker")
+			log.Println("Bridge running in docker")
 			break
 		}
-		log.Printf("API Not running in docker : %s\n", err)
+		log.Printf("Bridge Not running in docker : %s\n", err)
 
 		// is it running locally?
 		conn, err = amqp.Dial("amqp://guest:guest@localhost:5672/")
 		if err == nil {
-			log.Println("API Running in localhost")
+			log.Println("Bridge Running in localhost")
 			break
 		}
-		log.Printf("API not running locally : %s\n", err)
+		log.Printf("Bridge not running locally : %s\n", err)
 
 		// wait and retry
 		time.Sleep(5 * time.Second)

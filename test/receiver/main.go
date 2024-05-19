@@ -17,7 +17,7 @@ func main() {
 	}
 	user := os.Getenv("userid")
 	pwd := os.Getenv("pwd")
-	brk := os.Getenv("broker")
+	url := os.Getenv("url")
 
 	// load configuration
 	cfg, err := readConfig()
@@ -26,7 +26,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	client, err := setupMQTT(cfg, user, pwd, brk)
+	client, err := setupMQTT(cfg, user, pwd, url)
 	if err != nil {
 		log.Println(err)
 		os.Exit(5)

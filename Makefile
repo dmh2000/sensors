@@ -1,11 +1,13 @@
-all: build
+all: 
 
+# run staticcheck and build
 build:
 	$(MAKE) -C sensor
 	$(MAKE) -C bridge
 	$(MAKE) -C api
 	$(MAKE) -C dashboard
 
+# build the docker containers
 docker-build:
 	$(MAKE) -C rabbitmq docker-build
 	$(MAKE) -C sensor docker-build
@@ -14,24 +16,12 @@ docker-build:
 	$(MAKE) -C api docker-build
 	$(MAKE) -C dashboard docker-build
 
-docker-run:
-	$(MAKE) -C rabbitmq docker-run
-	$(MAKE) -C mosquitto docker-run
-	$(MAKE) -C sensor docker-run
-	$(MAKE) -C bridge docker-run
-	$(MAKE) -C api docker-run
-	$(MAKE) -C dashboard docker-run
-	sudo docker ps
-
+# launch the containers
 docker-compose:
 	# build the images
 	sudo docker compose build
 	# start the services
 	sudo docker compose up
-	# start the sensors outside of compose
-	$(MAKE) -C sensor docker-build
-	$(MAKE) -C sensor docker-run
-
 
 docker-kill:
 	-sudo docker ps -a -q | xargs sudo docker kill

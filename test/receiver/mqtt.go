@@ -2,24 +2,20 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
+const mqttQOS = 2 // exactly once
+
 // returns a callback function that will print the received message if 'debug' is true
-func messagePubHandlerFunc(debug bool) mqtt.MessageHandler {
-	return func(client mqtt.Client, msg mqtt.Message) {
-		if debug {
-			// log.Printf("%s,%s\n", msg.Topic(), msg.Payload())
-			log.Printf("%s\n", msg.Payload())
-		}
-	}
+func messagePubHandlerFunc(client mqtt.Client, msg mqtt.Message) {
+	fmt.Printf("%s\n", msg.Payload())
 }
 
 // upon connection to the client, this is called
 var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
-	log.Println("Connected")
+	// log.Println("Connected")
 }
 
 // this is called when the connection to the client is lost, it prints "Connection lost" and the corresponding error
@@ -29,8 +25,7 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 
 func subscribeMQTT(client mqtt.Client, topic string) error {
 	// subscribe to the same topic, that was published to, to receive the messages
-	log.Println("subscribing to topic: ", topic)
-	token := client.Subscribe(topic, 1, nil)
+	token := client.Subscribe(topic, mqttQOS, nil)
 	token.Wait()
 	// Check for errors during subscribe (More on error reporting https://pkg.go.dev/github.com/eclipse/paho.mqtt.golang#readme-error-handling)
 	if token.Error() != nil {
@@ -39,18 +34,16 @@ func subscribeMQTT(client mqtt.Client, topic string) error {
 	return nil
 }
 
-func setupMQTT(cfg config, user string, pwd string, brk string) (mqtt.Client, error) {
+func setupMQTT(cfg config, user string, pwd string, url string) (mqtt.Client, error) {
 	// initialize the client
-	var broker = brk // find the host name in the Overview of your cluster (see readme)
-	var port = 8883  // find the port right under the host name, standard is 8883
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("tls://%s:%d", broker, port))
-	opts.SetClientID("receiver") // set a name as you desire
+	opts.AddBroker(url)
+	opts.SetClientID(cfg.name) // set a name as you desire
 	opts.SetUsername(user)
 	opts.SetPassword(pwd)
 
 	// callback for subscribed messages
-	opts.SetDefaultPublishHandler(messagePubHandlerFunc(cfg.debug))
+	opts.SetDefaultPublishHandler(messagePubHandlerFunc)
 
 	// callback when connected to broker
 	opts.OnConnect = connectHandler

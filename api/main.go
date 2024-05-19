@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -18,7 +19,12 @@ func main() {
 	data := make(chan string)
 
 	// connect to rabbitMQ and start listening for messages
-	go rabbitConsumer(data)
+	go func() {
+		err := rabbitConsumer(data)
+		if err != nil {
+			log.Fatalf("Error connecting to RabbitMQ: %s", err)
+		}
+	}()
 
 	// read from the channel and update the latest values
 	go func() {

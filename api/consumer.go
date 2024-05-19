@@ -7,13 +7,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Panicf("%s: %s", msg, err)
-	}
-}
-
-func rabbitConsumer(c chan string) {
+func rabbitConsumer(c chan string) error {
 	var conn *amqp.Connection
 	var err error
 	for {
@@ -40,7 +34,9 @@ func rabbitConsumer(c chan string) {
 	defer conn.Close()
 
 	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
+	if err != nil {
+		return err
+	}
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
@@ -51,7 +47,9 @@ func rabbitConsumer(c chan string) {
 		false,       // no-wait
 		nil,         // arguments
 	)
-	failOnError(err, "Failed to declare a queue")
+	if err != nil {
+		return err
+	}
 
 	msgs, err := ch.Consume(
 		q.Name, // queue
@@ -62,9 +60,12 @@ func rabbitConsumer(c chan string) {
 		false,  // no-wait
 		nil,    // args
 	)
-	failOnError(err, "Failed to register a consumer")
+	if err != nil {
+		return err
+	}
 
 	for msg := range msgs {
 		c <- string(msg.Body)
 	}
+	return nil
 }

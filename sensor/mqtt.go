@@ -9,6 +9,8 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
+const mqttQOS = 2 // exactly once
+
 // returns a callback function that will print the received message if 'debug' is true
 func messagePubHandlerFunc(debug bool) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
@@ -31,23 +33,27 @@ func formatTopic(shape string) string {
 // publishMQTT messages to the topic "topic/sensor"
 // with a frequency in Hz and amplitude in m
 func publishMQTT(ctx context.Context, client mqtt.Client, cfg config) error {
+	const tokenTimeout = 2
+
 	// publish the message "Message" to the topic "topic/test" 10 times in a for loop
 	ms := time.Millisecond * time.Duration(cfg.dt*1000)
 
-	w, err := newWave(cfg.shape, cfg.amplitude, cfg.frequency, cfg.dt)
+	w, err := waveFactory(cfg.shape, cfg.amplitude, cfg.frequency, cfg.dt)
 	if err != nil {
 		return err
 	}
 
 	for {
 		// step the simulation
-		x, y := w.step()
+		var t float64
+		var y float64
+		t, y, w = w.step()
 
 		// format the message
-		text := formatMessage(x, y)
+		text := formatMessage(t, y)
 		topic := formatTopic(cfg.shape)
-		token := client.Publish(topic, 0, false, text)
-		token.WaitTimeout(retryDelay * time.Second)
+		token := client.Publish(topic, mqttQOS, false, text)
+		token.WaitTimeout(tokenTimeout * time.Second)
 		// Check for errors during publishing the message
 		if token.Error() != nil {
 			return fmt.Errorf("mqtt publish: %w", token.Error())
@@ -61,8 +67,6 @@ func publishMQTT(ctx context.Context, client mqtt.Client, cfg config) error {
 		}
 	}
 }
-
-const retryDelay = 5
 
 func setupMQTT(cfg config, user string, pwd string, url string) (mqtt.Client, error) {
 
@@ -98,6 +102,9 @@ func setupMQTT(cfg config, user string, pwd string, url string) (mqtt.Client, er
 
 	// create the client using the options above
 	client := mqtt.NewClient(opts)
+
+	var attempt = 1
+	var retryDelay = 1
 	for {
 		var token mqtt.Token
 
@@ -105,9 +112,10 @@ func setupMQTT(cfg config, user string, pwd string, url string) (mqtt.Client, er
 		if token = client.Connect(); token.Wait() && token.Error() == nil {
 			break
 		}
-		// if the connection fails, wait  before trying again
-		// could use backoff here
-		time.Sleep(retryDelay * time.Second)
+		// if the connection fails, wait before trying again with exponential backoff
+		delay := time.Duration(retryDelay*(1<<attempt)) * time.Second
+		time.Sleep(delay)
+		attempt++
 
 		log.Printf("Retry connection : %s\n", token.Error())
 	}

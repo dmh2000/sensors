@@ -1,5 +1,5 @@
 # frequency in Hz (cycles/sec): must be float d.d+
-frequency: 0.05
+frequency: 0.1
 # amplitude in m : must be float d.d+
 amplitude: 1.0
 # sample rate in samples/second : must be float d.d+

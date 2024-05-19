@@ -7,6 +7,7 @@ build: $(wildcard *.go)
 
 docker-build: 
 	@echo "===================================== Building rabbitmq bridge docker image"
+	staticcheck .
 	sudo docker build --quiet --no-cache -t bridge .
 
 docker-run: 

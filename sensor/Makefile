@@ -1,4 +1,4 @@
-sensors: sin-wave triangle-wave square-wave
+build: sin-wave triangle-wave square-wave
 
 sin-wave: FORCE
 	@echo build sin-wave

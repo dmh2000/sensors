@@ -1,0 +1,3 @@
+FROM rabbitmq:3.13-management
+EXPOSE 5672:5672
+EXPOSE 15672:15672

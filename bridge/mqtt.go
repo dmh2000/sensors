@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
@@ -14,8 +15,13 @@ import (
 func messagePubHandlerFunc(ch chan string) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		rbq := fmt.Sprintf("%s,%s", msg.Topic(), msg.Payload())
-		// send to producer
-		ch <- rbq
+
+		select {
+		case ch <- rbq:
+			// log.Println(rbq)
+		default:
+			log.Println("Channel full, dropping message")
+		}
 	}
 }
 
@@ -26,31 +32,29 @@ var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
 
 // this is called when the connection to the client is lost, it prints "Connection lost" and the corresponding error
 var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
-	//log.Printf("Connection lost: %v", err)
+	log.Println(err)
 }
+
+const subscribeTimeout = 5
 
 func subscribeMQTT(client mqtt.Client, topic string) error {
 	// subscribe to the same topic, that was published to, to receive the messages
-	log.Println("subscribing to topic: ", topic)
 	token := client.Subscribe(topic, 1, nil)
-	token.Wait()
-	// Check for errors during subscribe (More on error reporting https://pkg.go.dev/github.com/eclipse/paho.mqtt.golang#readme-error-handling)
 	if token.Error() != nil {
 		return token.Error()
 	}
-	return nil
+	token.WaitTimeout(subscribeTimeout * time.Second)
+	if token.Error() == nil {
+		log.Println("subscribed to topic: ", topic)
+	}
+	return token.Error()
 }
 
 func setupMQTT(pipe chan string, user string, pwd string, url string, id string) (mqtt.Client, error) {
 	// initialize the client
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(url)
-	opts.SetClientID(id) // set a name as you desire
-	opts.SetUsername(user)
-	opts.SetPassword(pwd)
-
-	opts.AddBroker(url)
-	opts.SetClientID(id) // set a name as you desire
+	opts.SetClientID(id) // generate a unique client ID using `github.com/google/uuid
 
 	if user != "" && pwd != "" {
 		opts.SetUsername(user)
@@ -77,35 +81,30 @@ func setupMQTT(pipe chan string, user string, pwd string, url string, id string)
 	return client, nil
 }
 
-func subscriber(pipe chan string) {
+const defaultUrl = "tcp://localhost:1883"
+
+func subscriber(pipe chan string, topics []string) {
 	// setup mqtt receiver
-	user := os.Getenv("userid")
-	pwd := os.Getenv("pwd")
-	url := os.Getenv("url")
+	user, _ := os.LookupEnv("userid") // default to empty string
+	pwd, _ := os.LookupEnv("pwd")     // default to empty string
+	url, ok := os.LookupEnv("url")    // use default url
+	if !ok {
+		url = defaultUrl
+	}
 
 	client, err := setupMQTT(pipe, user, pwd, url, "bridge")
 	if err != nil {
+		// kill the app if parameters are incorrect
 		log.Fatal(err)
 	}
 	defer client.Disconnect(250)
 
-	// add suscriptions
-	err = subscribeMQTT(client, "w/sin")
-	if err != nil {
-		log.Println(err)
-		os.Exit(3)
-	}
-
-	err = subscribeMQTT(client, "w/square")
-	if err != nil {
-		log.Println(err)
-		os.Exit(3)
-	}
-
-	err = subscribeMQTT(client, "w/triangle")
-	if err != nil {
-		log.Println(err)
-		os.Exit(3)
+	for _, topic := range topics {
+		// add suscriptions
+		err = subscribeMQTT(client, topic)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	// block until user hits ctrl+c

@@ -112,6 +112,7 @@ func (w triangle) step() (t float64, y float64, wx wave) {
 		w.y -= w.dy
 		if w.y <= -w.amplitude {
 			w.y = -w.amplitude
+
 			w.state = triangleUp
 		}
 	default:
@@ -172,20 +173,14 @@ func (w square) step() (t float64, y float64, wx wave) {
 	return w.t, w.y, w
 }
 
-// =======================================
-// map wave type to handler function
 // dispatch
-// =======================================
 var shapeFuncs = map[string]func(float64, float64, float64) wave{
 	sinWave:      newSin,
 	triangleWave: newTriangle,
 	squareWave:   newSquare,
 }
 
-// =======================================
-// wave factory
-// =======================================
-func waveFactory(shape string, amplitude float64, frequency float64, dt float64) (wave, error) {
+func newWave(shape string, amplitude float64, frequency float64, dt float64) (wave, error) {
 
 	if f, ok := shapeFuncs[shape]; ok {
 		return f(amplitude, frequency, dt), nil
