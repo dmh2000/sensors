@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+
 	configFile := "config"
 	if len(os.Args) >= 2 {
 		configFile = os.Args[1]

@@ -15,6 +15,16 @@ type config struct {
 	name      string  // client name
 }
 
+var validShape = map[string]bool{
+	"square":   true,
+	"sin":      true,
+	"triangle": true,
+}
+
+// readConfig reads the configuration from the given file and returns a
+// config struct or an error if the configuration is missing or invalid.
+// configFile: name of the configuration file
+// Returns: config struct or error
 func readConfig(configFile string) (config, error) {
 	var cfg config
 
@@ -26,6 +36,8 @@ func readConfig(configFile string) (config, error) {
 	if err != nil {
 		return cfg, fmt.Errorf("error loading config file")
 	}
+
+	// get configuration parameters
 	shape := viper.Get("shape")
 	frequency := viper.Get("frequency")
 	amplitude := viper.Get("amplitude")
@@ -33,23 +45,30 @@ func readConfig(configFile string) (config, error) {
 	debug := viper.Get("debug")
 	name := viper.Get("name")
 
+	// check if all parameters are present
 	if shape == nil || frequency == nil || amplitude == nil || rate == nil {
 		return cfg, fmt.Errorf("missing configuration parameters")
 	}
 
+	// check if all parameters are of the correct type
 	w, ok := shape.(string)
 	if !ok {
 		return cfg, fmt.Errorf("config 'shape' is not a string")
+	}
+	if !validShape[w] {
+		return cfg, fmt.Errorf("unknown shape: %s", w)
 	}
 
 	f, ok := frequency.(float64)
 	if !ok {
 		return cfg, fmt.Errorf("config 'frequency' is not a float64")
 	}
+
 	a, ok := amplitude.(float64)
 	if !ok {
 		return cfg, fmt.Errorf("config 'amplitude' is not a float64")
 	}
+
 	r, ok := rate.(float64)
 	if !ok {
 		return cfg, fmt.Errorf("config 'rate' is not a float")
@@ -65,9 +84,10 @@ func readConfig(configFile string) (config, error) {
 		return cfg, fmt.Errorf("config 'name' is not a string")
 	}
 
-	// computer delta T in fractional seconds
-	dt := 1.0 / float64(r)
+	// compute delta T in fractional seconds
+	dt := 1.0 / r
 
+	// create config struct
 	cfg = config{w, f, a, dt, p, n}
 
 	return cfg, nil
